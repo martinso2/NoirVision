@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { DashboardShell } from "@/components/layout/DashboardShell";
 
 export const metadata: Metadata = {
   title: "NoirVision",
-  description: "NoirVision app",
+  description: "Local AI dashboard for LLM and ComfyUI workflows",
 };
 
 export default function RootLayout({
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <DashboardShell>{children}</DashboardShell>
+      </body>
     </html>
   );
 }

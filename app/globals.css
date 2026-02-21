@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --noir-950: #08080a;
+    --noir-900: #0d0d10;
+    --noir-800: #15151a;
+    --noir-700: #1c1c24;
+    --noir-600: #252530;
+    --cobalt-950: #0a0f1a;
+    --cobalt-900: #0f1729;
+    --cobalt-800: #162238;
+    --noir-panel-top: rgba(22, 34, 56, 0.85);
+    --noir-panel-bottom: rgba(13, 15, 16, 0.95);
+  }
+}
+
+@layer components {
+  .noir-gradient-bg {
+    background: radial-gradient(
+      ellipse 120% 80% at 50% 0%,
+      var(--cobalt-900) 0%,
+      var(--cobalt-950) 40%,
+      var(--noir-900) 70%,
+      var(--noir-950) 100%
+    );
+  }
+
+  .noir-panel {
+    background: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      var(--noir-panel-top) 0%,
+      var(--noir-panel-bottom) 100%
+    );
+    border: 1px solid rgba(45, 212, 191, 0.12);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .noir-panel:hover {
+    border-color: rgba(45, 212, 191, 0.2);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(45, 212, 191, 0.04);
+  }
+
+  .noir-sidebar-bg {
+    background: radial-gradient(
+      ellipse 80% 120% at 50% 50%,
+      var(--noir-800) 0%,
+      var(--noir-900) 50%,
+      var(--cobalt-900) 100%
+    );
+  }
+}
