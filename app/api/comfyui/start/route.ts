@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import path from "path";
 import { spawn } from "child_process";
 
+// ComfyUI lives in a different directory than NoirVision. Prefer env so it works wherever ComfyUI is.
 const COMFYUI_DIR =
   process.env.NOIRVISION_COMFYUI_DIR ?? path.join(process.cwd(), "..", "ComfyUI");
 const COMFYUI_PORT = process.env.COMFYUI_PORT ?? "8188";
+const COMFYUI_CPU = process.env.COMFYUI_CPU === "1" || process.env.COMFYUI_CPU === "true";
+
+const LOG_DIR = path.join(process.cwd(), "logs");
+const STARTUP_LOG_FILE = path.join(LOG_DIR, "comfyui-startup.log");
+let startupLogStream: import("fs").WriteStream | null = null;
 
 export async function POST() {
+  // Resolve to an absolute path (e.g. D:\AI\ComfyUI) so we always run from the real ComfyUI folder
   const comfyDir = path.isAbsolute(COMFYUI_DIR)
     ? COMFYUI_DIR
     : path.resolve(process.cwd(), COMFYUI_DIR);
@@ -35,8 +42,35 @@ export async function POST() {
     );
   }
 
-  try {
-    const child = spawn(pythonExe, ["main.py", "--port", COMFYUI_PORT], {
+  const args = ["main.py", "--port", COMFYUI_PORT];
+  if (COMFYUI_CPU) args.push("--cpu");
+
+  const pythonExeForSpawn = fs.existsSync(venvPython) ? venvPython : pythonExe;
+
+  const spawnWithLogging = () => {
+    if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
+    if (startupLogStream) {
+      try { startupLogStream.end(); } catch { /* ignore */ }
+      startupLogStream = null;
+    }
+    startupLogStream = fs.createWriteStream(STARTUP_LOG_FILE, { flags: "w" });
+    startupLogStream.write(`[NoirVision] ComfyUI starting at ${new Date().toISOString()}\n`);
+    startupLogStream.write(`[NoirVision] ${pythonExeForSpawn} ${args.join(" ")}\n\n`);
+
+    const child = spawn(pythonExeForSpawn, args, {
+      cwd: comfyDir,
+      detached: true,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env },
+      windowsHide: true,
+    });
+    if (child.stdout) child.stdout.pipe(startupLogStream, { end: false });
+    if (child.stderr) child.stderr.pipe(startupLogStream, { end: false });
+    child.unref();
+  };
+
+  const spawnWithoutLogging = () => {
+    const child = spawn(pythonExeForSpawn, args, {
       cwd: comfyDir,
       detached: true,
       stdio: "ignore",
@@ -44,6 +78,14 @@ export async function POST() {
       windowsHide: true,
     });
     child.unref();
+  };
+
+  try {
+    try {
+      spawnWithLogging();
+    } catch {
+      spawnWithoutLogging();
+    }
     return NextResponse.json({
       ok: true,
       message: "ComfyUI start requested",
