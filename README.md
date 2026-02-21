@@ -29,23 +29,28 @@ npm run start
 
 ## Git and GitHub
 
-If Git is not initialized yet:
+Repository: [martinso2/NoirVision](https://github.com/martinso2/NoirVision)
+
+From `D:\AI\NoirVision`, run once to connect and push:
 
 ```bash
+# Initialize Git (if not already)
 git init
-```
 
-Create a new **empty** repo on GitHub named `NoirVision` (no README, no .gitignore, no license). Then:
-
-```bash
-# Add remote (replace <my-username> with your GitHub username)
-git remote add origin https://github.com/<my-username>/NoirVision.git
-
-# First commit (if you haven’t already)
+# First commit
 git add .
 git commit -m "Initial commit: Next.js + Tailwind"
 
-# Push and set upstream
+# Add remote and push
+git remote add origin https://github.com/martinso2/NoirVision.git
+git branch -M main
+git push -u origin main
+```
+
+If the repo was already initialized and you only need to add the remote and push:
+
+```bash
+git remote add origin https://github.com/martinso2/NoirVision.git
 git branch -M main
 git push -u origin main
 ```
